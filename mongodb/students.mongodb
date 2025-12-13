@@ -1,0 +1,28 @@
+use parul;
+
+db.createCollection("students");
+
+db.students.insertOne({
+    name: "John Doe", 
+    age: 20, 
+    major: "Engineering"
+});
+
+db.students.insertMany([
+    { name: "Jane Smith", age: 22, major: "Biology" },
+    { name: "Sam Brown", age: 19, major: "History" },
+    { name: "Lisa White", age: 21, major: "Chemistry" }
+]);
+
+db.students.updateMany(
+    {},
+    { $set: { status: "active" } }
+);
+
+db.students.find().pretty();
+
+db.students.find({age: { $lt: 21 }}).count();
+
+db.students.deleteOne({ name: "Sam Brown" });
+
+db.students.find({age: { $gte: 20 }}).count();
