@@ -1,0 +1,142 @@
+// data modeling is a process of creating visual representations or structure of the data in a database.
+// In MongoDB, data modeling involves designing the schema for collections and documents to optimize performance and ensure data integrity.
+
+// 1. EMBEDDED DATA MODELING
+// In this approach, related data is stored within a single document. This is useful for one-to-few relationships where the related data is frequently accessed together.
+
+//2. referenced DATA MODELING
+// In this approach, related data is stored in separate documents, and references (usually ObjectIds) are used to link them. This is useful for one-to-many or many-to-many relationships where the related data is large or frequently updated independently.
+
+use datamodelingDB;
+
+// Embedded Data Modeling Example
+db.createCollection("Faculty_embedded", {
+  validator: {
+    $jsonSchema: {
+      bsonType: "object",
+      required: ["name", "age", "role", "department", "subjects"],
+      properties: {
+        name: { bsonType: "string" },
+        age: { bsonType: "int" },
+        role: { bsonType: "string" },
+        department: { bsonType: "string" },
+        subjects: {
+          bsonType: "array",
+          items: {
+            bsonType: "object",
+            required: ["subject_name", "semester"],
+            properties: {
+              subject_name: { bsonType: "string" },
+              semester: { bsonType: "int" },
+            },
+          },
+        },
+      },
+    },
+  },
+});
+
+db.Faculty_embedded.insertOne({
+  name: "Dr. susruthi",
+  age: 30,
+  role: "Professor",
+  department: "Computer Science",
+  subjects: [
+    { subject_name: "Database Systems", semester: 3 },
+    { subject_name: "Data Modeling", semester: 5 },
+  ],
+});
+
+db.Faculty_embedded.insertMany([
+  {
+    name: "Dr. Mohit Rathod",
+    age: 45,
+    role: "Professor",
+    department: "Machine Learning",
+    subjects: [
+      { subject_name: "Artificial Intelligence", semester: 4 },
+      { subject_name: "Data Science", semester: 6 },
+    ],
+  },
+  {
+    name: "Dr. Ritika Patel",
+    age: 26,
+    role: "Mentor",
+    department: "Mobile Development",
+    subjects: [
+      { subject_name: "Flutter", semester: 2 },
+      { subject_name: "Data Science", semester: 4 },
+    ],
+  },
+]);
+
+db.Faculty_embedded.find();
+
+db.Faculty_embedded.find({ "subjects.subject_name": "Data Science" });
+
+
+use datamodelingDB;
+
+// Referenced Data Modeling Example
+
+db.createCollection("Subject", {
+  validator: {
+    $jsonSchema: {
+        bsonType: "object",
+        required: ["id", "name", "semester"],
+        properties: {
+            id: { bsonType: "int" },
+            name: { bsonType: "string" },
+            semester: { bsonType: "int" },
+        },
+    },
+  },
+});
+
+db.createCollection("Faculty_referenced", {
+  validator: {
+    $jsonSchema: {  
+        bsonType: "object",
+        required: ["name", "age", "role", "department", "subject_ids"],
+        properties: {
+            name: { bsonType: "string" },
+            age: { bsonType: "int" },
+            role: { bsonType: "string" },
+            department: { bsonType: "string" },
+            subject_ids: {
+                bsonType: "array",
+                items: { bsonType: "int" },
+            },
+        },
+    },
+  },
+});
+
+db.Subject.insertMany([
+    { id: 1, name: "Database Systems", semester: 3 },
+    { id: 2, name: "Data Modeling", semester: 5 },
+    { id: 3, name: "Artificial Intelligence", semester: 4 },
+]);
+
+db.Faculty_referenced.insertOne(
+    {
+        name: "Dr. Susruthi",
+        age: 30,
+        role: "Professor",
+        department: "Computer Science",
+        subject_ids: [1, 2],
+    },
+);
+
+db.Faculty_referenced.insertOne(
+    {
+        name: "Dr. Mohit Rathod",
+        age: 45,
+        role: "Professor",
+        department: "Machine Learning",
+        subject_ids: [3, 4],
+    },
+);
+
+db.Subject.find();
+db.Faculty_referenced.find();
